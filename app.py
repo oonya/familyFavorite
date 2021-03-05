@@ -36,6 +36,14 @@ def index():
     media_tweet = favorite_tweets[0]
     return(media_tweet['full_text'])
 
+
+@app.route('/check')
+def check():
+    q = ''
+
+    return q
+
+
 def add_query(url, hash):
     query = urllib.parse.urlencode(hash, doseq=True)
 
