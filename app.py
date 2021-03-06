@@ -9,12 +9,27 @@ from models.models import Families, Affiliation, Stocks
 from models.database import db_session
 
 
+from azure.cognitiveservices.vision.computervision import ComputerVisionClient
+from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
+from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
+from msrest.authentication import CognitiveServicesCredentials
+
+from array import array
+import os
+from PIL import Image
+import sys
+import time
+
+
 app = Flask(__name__)
 
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 ACCESS_TOKEN_SECRET = os.environ['ACCESS_TOKEN_SECRET']
+
+SUBSCRIPTION_KEY = os.environ['AZURE_COMPUTER_VISION_SUBSCRIPTION_KEY']
+ENDPOINT = os.environ['AZURE_COMPUTER_VISION_ENDPOINT']
 
 
 twitter = OAuth1Session(
@@ -23,6 +38,7 @@ twitter = OAuth1Session(
     ACCESS_TOKEN,
     ACCESS_TOKEN_SECRET
 )
+
 
 @app.route('/get-favorites/<string:family_id>')
 def get_favorites(family_id):
@@ -87,6 +103,20 @@ def debug():
 
 
     return jsonify(res)
+
+
+@app.route('/vision-debug')
+def v_debeg():
+    computervision_client = ComputerVisionClient(ENDPOINT, CognitiveServicesCredentials(SUBSCRIPTION_KEY))
+    twi_img = "https://radichubu.jp/files/topics/17395_ext_01_0.jpeg"
+    tags_result_remote = computervision_client.tag_image(twi_img )
+
+    res = {"res" : []}
+    for tag in tags_result_remote.tags:
+        res["res"].append("'{}' with confidence {:.2f}%".format(tag.name, tag.confidence * 100))
+    
+    return jsonify(res)
+
 
 
 
