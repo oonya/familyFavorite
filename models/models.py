@@ -27,7 +27,7 @@ class Stocks(Base):
     __tablename__ = 'stocks'
     id = Column(Integer, primary_key=True)
     twi_link = Column(String(255), unique=False)
-    family_id = Column(String(128), unique=False)
+    family_id = Column(String(128), unique=True)
 
     def __init__(self, twi_link=None, family_id=None):
         self.twi_link = twi_link

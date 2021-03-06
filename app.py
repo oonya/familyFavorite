@@ -29,14 +29,11 @@ def get_favorites(family_id):
     with open('responses/get_favorites.json',  mode="r", buffering=-1, encoding='utf-8') as f:
         res = json.loads(f.read())
     
-
-    # TODO get twi_id from family_id
     twi_ids = []
     all_family_member = db_session.query(Affiliation).filter(Affiliation.family_id == family_id).all()
 
     for m in all_family_member:
         twi_ids.append(m.twi_id)
-
 
     for twi_id in twi_ids:
         favorite_tweets = get_favorite_tweets(twi_id)
@@ -115,18 +112,46 @@ def create():
 def enter(family_id):
     return get_favorites(family_id)
 
-# todo
-# ストックが既にあるかないか確認する
-@app.route('/stock', methods=['POST'])
+
+@app.route('/create-stock', methods=['POST'])
 def stock():
     family_id = request.form['family_id']
     twi_link = request.form['twi_link']
 
-    s_object = Stocks(family_id=family_id, twi_link=twi_link)
-    db_session.add(s_object)
+    s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
+    if not s:
+        s_object = Stocks(family_id=family_id, twi_link=twi_link)
+        db_session.add(s_object)
+        db_session.commit()
+    else:
+        s.twi_link = twi_link
+        db_session.commit()
+
+
+    return show_stock(family_id)
+
+
+@app.route('/delete-stock', methods=['POST'])
+def delete_stock():
+    family_id = request.form['family_id']
+    s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
+    db_session.delete(s)
     db_session.commit()
 
-    return get_favorites(family_id)
+    return show_stock(family_id)
+
+
+@app.route('/show-stock/<string:family_id>')
+def show_stock(family_id):
+    res = {"twi_link" : ""}
+    s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
+
+    if s:
+        res["twi_link"] = s.twi_link
+    else:
+        res["twi_link"] = "nothing"
+
+    return res
 
 
 @app.route('/show-config/<string:family_id>')
