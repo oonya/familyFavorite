@@ -5,6 +5,8 @@ from requests_oauthlib import OAuth1Session
 import urllib.parse
 import json
 
+from flask_cors import CORS
+
 from models.models import Families, Affiliation, Stocks
 from models.database import db_session
 
@@ -22,6 +24,7 @@ import time
 
 
 app = Flask(__name__)
+CORS(app)
 
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
@@ -114,7 +117,7 @@ def v_debeg():
     res = {"res" : []}
     for tag in tags_result_remote.tags:
         res["res"].append("'{}' with confidence {:.2f}%".format(tag.name, tag.confidence * 100))
-    
+
     return jsonify(res)
 
 
