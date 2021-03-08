@@ -5,7 +5,7 @@ from requests_oauthlib import OAuth1Session
 import urllib.parse
 import json
 
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin # ADD
 
 from models.models import Families, Affiliation, Stocks
 from models.database import db_session
@@ -24,7 +24,8 @@ import time
 
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+CORS(app, support_credentials=True) # ADD
 
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
@@ -124,6 +125,7 @@ def v_debeg():
 
 
 @app.route('/create-family', methods=['POST'])
+@cross_origin(supports_credentials=True)  # ADD
 def create():
     family_id = request.form['family_id']
     twi_id = request.form['twi_id']
