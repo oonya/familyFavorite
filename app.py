@@ -25,9 +25,12 @@ import time
 
 app = Flask(__name__)
 # CORS(app)
-CORS(app, support_credentials=True) # ADD
+# CORS(app, support_credentials=True) # ADD
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+app.config['JSON_AS_ASCII'] = False
 
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
@@ -127,10 +130,14 @@ def v_debeg():
 
 
 @app.route('/create-family', methods=['POST'])
-@cross_origin(supports_credentials=True)  # ADD
-def create():
-    family_id = request.form['family_id']
-    twi_id = request.form['twi_id']
+def create():    
+    # family_id = request.form['family_id']
+    # twi_id = request.form['twi_id']
+
+    f = request.get_data()
+    form_data = json.loads(f.decode('utf-8'))
+    family_id = form_data['family_id']
+    twi_id = form_data['twi_id']
 
     # save Families table
     f_object = Families(family_id=family_id)
@@ -152,8 +159,13 @@ def enter(family_id):
 
 @app.route('/create-stock', methods=['POST'])
 def stock():
-    family_id = request.form['family_id']
-    twi_link = request.form['twi_link']
+    # family_id = request.form['family_id']
+    # twi_link = request.form['twi_link']
+
+    f = request.get_data()
+    form_data = json.loads(f.decode('utf-8'))
+    family_id = form_data['family_id']
+    twi_link = form_data['twi_link']
 
     s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
     if not s:
@@ -170,7 +182,19 @@ def stock():
 
 @app.route('/delete-stock', methods=['POST'])
 def delete_stock():
-    family_id = request.form['family_id']
+    # return jsonify(dict(request.headers))
+
+    
+    # family_id = request.form.get('family_id')
+
+    f = request.get_data()
+    form_data = json.loads(f.decode('utf-8'))
+    family_id = form_data['family_id']
+
+
+    if family_id == None:
+        return jsonify(dict(request.headers))
+
     s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
     db_session.delete(s)
     db_session.commit()
@@ -206,8 +230,13 @@ def show(family_id):
 
 @app.route('/update-config', methods=['POST'])
 def update():
-    family_id = request.form['family_id']
-    twi_id = request.form['twi_id']
+    # family_id = request.form['family_id']
+    # twi_id = request.form['twi_id']
+
+    f = request.get_data()
+    form_data = json.loads(f.decode('utf-8'))
+    family_id = form_data['family_id']
+    twi_id = form_data['twi_id']
 
     a_object = Affiliation(family_id=family_id, twi_id=twi_id)
     db_session.add(a_object)
