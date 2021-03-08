@@ -27,6 +27,8 @@ app = Flask(__name__)
 # CORS(app)
 CORS(app, support_credentials=True) # ADD
 
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
