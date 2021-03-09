@@ -25,8 +25,8 @@ import time
 
 app = Flask(__name__)
 # CORS(app)
-# CORS(app, support_credentials=True) # ADD
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, support_credentials=True) # ADD
+# CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['CORS_HEADERS'] = 'Content-Type'
 
