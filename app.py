@@ -75,8 +75,8 @@ def get_favorite_tweets(twi_id):
     res = twitter.get(favorite_list_url)
 
     if res.status_code != 200:
-        print("GET FOVORITE_LIST REQUEST ERROR!!")
-        raise Exception
+        print("GET FOVORITE_LIST REQUEST ERROR!!\n\n\n\n\n\n")
+        return jsonify({"res" : "twitter api limited"})
 
     favorite_tweets = json.loads(res.text)
 
@@ -235,6 +235,9 @@ def update():
 
     f = request.get_data()
     form_data = json.loads(f.decode('utf-8'))
+
+    print("\n\n\n", form_data)
+    
     family_id = form_data['family_id']
     twi_id = form_data['twi_id']
 
