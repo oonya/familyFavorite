@@ -242,6 +242,11 @@ def update():
     family_id = form_data['family_id']
     twi_id = form_data['twi_id']
 
+    all_family_member = db_session.query(Affiliation).filter(Affiliation.family_id == family_id).all()
+    for m in all_family_member:
+        if m.twi_id == twi_id:
+            return jsonify({"res" : "already twi_id used"})
+
     a_object = Affiliation(family_id=family_id, twi_id=twi_id)
     db_session.add(a_object)
     db_session.commit()
