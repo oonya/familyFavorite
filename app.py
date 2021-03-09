@@ -166,14 +166,16 @@ def stock():
     form_data = json.loads(f.decode('utf-8'))
     family_id = form_data['family_id']
     twi_link = form_data['twi_link']
+    twi_img = form_data['twi_img'].encode("utf-8")
 
     s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
     if not s:
-        s_object = Stocks(family_id=family_id, twi_link=twi_link)
+        s_object = Stocks(family_id=family_id, twi_link=twi_link, twi_img=twi_img)
         db_session.add(s_object)
         db_session.commit()
     else:
         s.twi_link = twi_link
+        s.twi_img = twi_img
         db_session.commit()
 
 
@@ -192,9 +194,6 @@ def delete_stock():
     family_id = form_data['family_id']
 
 
-    if family_id == None:
-        return jsonify(dict(request.headers))
-
     s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
     db_session.delete(s)
     db_session.commit()
@@ -204,13 +203,15 @@ def delete_stock():
 
 @app.route('/show-stock/<string:family_id>')
 def show_stock(family_id):
-    res = {"twi_link" : ""}
+    res = {"twi_link" : "", "twi_img" : ""}
     s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
 
     if s:
         res["twi_link"] = s.twi_link
+        res["twi_img"] = s.twi_img.decode("utf-8")
     else:
         res["twi_link"] = "nothing"
+        res["twi_img"] = "nothing"
 
     return res
 
