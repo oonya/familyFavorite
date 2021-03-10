@@ -28,7 +28,7 @@ class Stocks(Base):
     id = Column(Integer, primary_key=True)
     twi_link = Column(String(255), unique=False)
     family_id = Column(String(128), unique=True)
-    twi_img = Column(LargeBinary(), unique=False)
+    twi_img = Column(String(), unique=False)
 
     def __init__(self, twi_link=None, family_id=None, twi_img=None):
         self.twi_link = twi_link

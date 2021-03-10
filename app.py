@@ -166,7 +166,7 @@ def stock():
     form_data = json.loads(f.decode('utf-8'))
     family_id = form_data['family_id']
     twi_link = form_data['twi_link']
-    twi_img = form_data['twi_img'].encode("utf-8")
+    twi_img = form_data['twi_img']
 
     s = db_session.query(Stocks).filter(Stocks.family_id == family_id).first()
     if not s:
@@ -208,7 +208,7 @@ def show_stock(family_id):
 
     if s:
         res["twi_link"] = s.twi_link
-        res["twi_img"] = s.twi_img.decode("utf-8")
+        res["twi_img"] = s.twi_img
     else:
         res["twi_link"] = "nothing"
         res["twi_img"] = "nothing"
