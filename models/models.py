@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, LargeBinary
+from sqlalchemy import Column, Integer, String, Text, DateTime, LargeBinary, Boolean
 from models.database import Base
 
 
@@ -12,7 +12,6 @@ class Families(Base):
 
 
 
-#以下を追加
 class Affiliation(Base):
     __tablename__ = 'affiliation'
     id = Column(Integer, primary_key=True)
@@ -34,4 +33,14 @@ class Stocks(Base):
         self.twi_link = twi_link
         self.family_id = family_id
         self.twi_img = twi_img
-#追加終わり
+
+
+class Cash(Base):
+    __tablename__ = 'cashes'
+    id = Column(Integer, primary_key=True)
+    tweet_id = Column(String(255), unique=True)
+    food = Column(Boolean, unique=False)
+
+    def __init__(self, tweet_id=None, food=None):
+        self.tweet_id = tweet_id
+        self.food = food

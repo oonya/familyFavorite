@@ -7,7 +7,7 @@ import json
 
 from flask_cors import CORS, cross_origin # ADD
 
-from models.models import Families, Affiliation, Stocks
+from models.models import Families, Affiliation, Stocks, Cash
 from models.database import db_session
 
 
@@ -49,11 +49,61 @@ twitter = OAuth1Session(
 )
 
 
+
+@app.route('/store-cash/<string:twi_id>')
+# def store_cash(twi_id):
+def store_cash(favorite_tweets):
+    res = []
+    detect_cnt = 0
+
+    for favorite_tweet in favorite_tweets:
+        if 'media' in favorite_tweet["entities"]:
+            
+            img_url = favorite_tweet["entities"]['media'][0]["media_url_https"]
+
+            tweet_id = favorite_tweet["id"]
+            sc_name = favorite_tweet["user"]["screen_name"]
+            tw_url = "https://twitter.com/{}/status/{}".format(sc_name, tweet_id)
+
+            c = db_session.query(Cash).filter(Cash.tweet_id == tweet_id).first()
+            if c != None:
+                if c.food:
+                    res.append({"img":img_url, "link":tw_url})
+                
+                continue
+
+            detect_cnt += 1
+            if detect_food(img_url):
+                res.append({"img":img_url, "link":tw_url})
+
+                c = Cash(tweet_id=tweet_id, food=True)
+            else:
+                c = Cash(tweet_id=tweet_id, food=False)
+
+            db_session.add(c)
+            db_session.commit()
+        
+        if detect_cnt == 5:
+            return res
+    
+    return res
+
+def detect_food(img_url):
+    computervision_client = ComputerVisionClient(ENDPOINT, CognitiveServicesCredentials(SUBSCRIPTION_KEY))
+    tags_result_remote = computervision_client.tag_image(img_url)
+
+    for tag in tags_result_remote.tags:
+        if tag.name == "food":
+            return True
+    
+    return False
+
+
 @app.route('/get-favorites/<string:family_id>')
 def get_favorites(family_id):
     with open('responses/get_favorites.json',  mode="r", buffering=-1, encoding='utf-8') as f:
         res = json.loads(f.read())
-    
+
     twi_ids = []
     all_family_member = db_session.query(Affiliation).filter(Affiliation.family_id == family_id).all()
 
@@ -63,6 +113,7 @@ def get_favorites(family_id):
     for twi_id in twi_ids:
         favorite_tweets = get_favorite_tweets(twi_id)
         hash = collect_favorite_img_tweet(favorite_tweets)
+        # hash = store_cash(favorite_tweets)
         res["res"].extend(hash)
 
     
@@ -71,7 +122,7 @@ def get_favorites(family_id):
 
 def get_favorite_tweets(twi_id):
     favorite_list_url = "https://api.twitter.com/1.1/favorites/list.json"
-    favorite_list_url = add_query(favorite_list_url, {"screen_name" : twi_id, "count" : 5, "include_entities" : "true", "tweet_mode" : "extended"})
+    favorite_list_url = add_query(favorite_list_url, {"screen_name" : twi_id, "count" : 100, "include_entities" : "true", "tweet_mode" : "extended"})
     res = twitter.get(favorite_list_url)
 
     if res.status_code != 200:
@@ -82,17 +133,40 @@ def get_favorite_tweets(twi_id):
 
     return(favorite_tweets)
 
+
 def collect_favorite_img_tweet(favorite_tweets):
     res = []
+    detect_cnt = 0
+
     for favorite_tweet in favorite_tweets:
         if 'media' in favorite_tweet["entities"]:
+            
             img_url = favorite_tweet["entities"]['media'][0]["media_url_https"]
 
-            id = favorite_tweet["id"]
+            tweet_id = favorite_tweet["id"]
             sc_name = favorite_tweet["user"]["screen_name"]
-            tw_url = "https://twitter.com/{}/status/{}".format(sc_name, id)
+            tw_url = "https://twitter.com/{}/status/{}".format(sc_name, tweet_id)
 
-            res.append({"img":img_url, "link":tw_url})
+            c = db_session.query(Cash).filter(Cash.tweet_id == tweet_id).first()
+            if c != None:
+                if c.food:
+                    res.append({"img":img_url, "link":tw_url})
+                
+                continue
+
+            detect_cnt += 1
+            if detect_food(img_url):
+                res.append({"img":img_url, "link":tw_url})
+
+                c = Cash(tweet_id=tweet_id, food=True)
+            else:
+                c = Cash(tweet_id=tweet_id, food=False)
+
+            db_session.add(c)
+            db_session.commit()
+        
+        if detect_cnt == 5:
+            return res
     
     return res
 
