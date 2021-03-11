@@ -312,7 +312,7 @@ def update():
     form_data = json.loads(f.decode('utf-8'))
 
     print("\n\n\n", form_data)
-    
+
     family_id = form_data['family_id']
     twi_id = form_data['twi_id']
 
@@ -328,6 +328,23 @@ def update():
     return show(family_id)
 
 
+@app.route('/delete-config', methods=['POST'])
+def deltee_config():
+    f = request.get_data()
+    form_data = json.loads(f.decode('utf-8'))
+
+    print("\n\n\n", form_data)
+
+    family_id = form_data['family_id']
+    twi_id = form_data['twi_id']
+
+    a = db_session.query(Affiliation).filter(Affiliation.family_id == family_id).all()
+    for m in a:
+        if m.twi_id == twi_id:
+            db_session.delete(m)
+            db_session.commit()
+    
+    return show(family_id)
 
 
 
