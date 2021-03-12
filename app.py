@@ -76,9 +76,9 @@ def store_cash(favorite_tweets):
             if detect_food(img_url):
                 res.append({"img":img_url, "link":tw_url})
 
-                c = Cash(tweet_id=tweet_id, food=True)
-            else:
-                c = Cash(tweet_id=tweet_id, food=False)
+            #     c = Cash(tweet_id=tweet_id, food=True)
+            # else:
+            #     c = Cash(tweet_id=tweet_id, food=False)
 
             db_session.add(c)
             db_session.commit()
